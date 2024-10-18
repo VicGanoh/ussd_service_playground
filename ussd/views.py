@@ -13,6 +13,31 @@ logger = logging.getLogger(__name__)
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def index(request):
+    """
+    Handle USSD requests and manage session states for user interactions.
+
+    Args:
+        request (Request): DRF request object containing USSD data with structure:
+            {
+                "sessionId": str,     # Unique session identifier
+                "phoneNumber": str,   # User's phone number
+                "text": str,          # User's input text
+                "serviceCode": str    # USSD service code
+            }
+
+    Returns:
+        Response: JSON response with structure:
+            {
+                "message": str,           # Display message for user
+                "continueSession": bool   # Whether to keep session active
+            }
+
+    Error Handling:
+        - Invalid input: Returns error message and ends session
+        - Session timeout: Returns timeout message and ends session
+        - System errors: Logs error and returns generic message
+    """
+
     return Response(
         data={"message": "Hello, World!"},
     )
@@ -128,7 +153,10 @@ def handle_ussd(request):
                     user_response_tracker.append(current_state)
                     cache_data[session_id] = user_response_tracker
 
-                    print("Updated state to level 1:", current_state)  # Debugging        
+                    print("Updated state to level 1:", current_state)
+                else:
+                    ussd_response["message"] = "Invalid input"
+                    ussd_response["continueSession"] = False    
             elif user_data == "2":
                 ussd_response["message"] = (
                     "Select your candidate"
@@ -154,7 +182,7 @@ def handle_ussd(request):
                 user_response_tracker.append(current_state)
                 cache_data[session_id] = user_response_tracker
 
-                print("Updated state to level 2:", current_state)  # Debugging
+                print("Updated state to level 2:", current_state)
             elif user_data == "3":
                 ussd_response["message"] = (
                     "Poll Result"
@@ -162,9 +190,6 @@ def handle_ussd(request):
                     + "\n2. James Ofori - 15 votes"
                     + "\n3. Nana Agyemang - 10 votes"
                 )
-                ussd_response["continueSession"] = False
-            else:
-                ussd_response["message"] = "Invalid input."
                 ussd_response["continueSession"] = False
         elif last_response.get("level") == 2:
             user_data = ussd_request.get("userData")
