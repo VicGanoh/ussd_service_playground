@@ -21,7 +21,7 @@ Tested locally with [ngrok](https://www.ngrok.com)
 1. Clone the repository:
    ```bash
    git clone https://github.com/VicGanoh/ussd_service_playground.git
-   cd ussd-service
+   cd ussd_service
 
 2. Install dependencies:
    ```bash
