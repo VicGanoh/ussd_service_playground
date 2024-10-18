@@ -19,5 +19,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.ussd_app, name="ussd_app")
+    # path("home", views.index, name="index"),
+    path("ussd", views.handle_ussd, name="ussd"),
 ]
